@@ -40,6 +40,48 @@ class Sn55Miner(_UpstreamMiner):
         # bind and the on-chain ServeAxon use it.
         self.axon_port = int(os.environ.get("NIOME_AXON_PORT", "8091"))
 
+    def _setup_routes(self):
+        """Replace the upstream /forward route.
+
+        Upstream calls bt.http_auth.verify() with the default require_receiver=True, but the
+        validator (niome_subnet/validator/forward.py::query_miner) calls bt.http_auth.sign()
+        WITHOUT receiver_ss58 — so no X-Bittensor-Receiver header is ever sent and every request
+        is rejected with `WrongReceiver -> 401`. Verified by direct reproduction against
+        bittensor 11.0.1. We accept what validators actually send; signature verification, the
+        10s nonce freshness window, replay protection and the validator-permit blacklist all
+        still apply. Set NIOME_REQUIRE_RECEIVER=1 to restore the strict behaviour.
+        """
+        from fastapi import Request, HTTPException
+        app = self.app
+        miner = self
+        require_receiver = os.environ.get("NIOME_REQUIRE_RECEIVER") == "1"
+
+        @app.post("/forward")
+        async def handle_forward(request: Request):
+            client = getattr(request.client, "host", "?")
+            try:
+                headers = dict(request.headers)
+                body = await request.body()
+                try:
+                    caller = bt.http_auth.verify(
+                        headers, body, method="POST", path="/forward",
+                        self_hotkey_ss58=miner.wallet.hotkey.ss58_address,
+                        require_receiver=require_receiver,
+                    )
+                except bt.http_auth.AuthError as e:
+                    logging.warning(f"/forward AUTH FAILED from {client}: {type(e).__name__}: {e}")
+                    raise HTTPException(status_code=401, detail=str(e))
+                logging.info(f"/forward authenticated caller {caller.hotkey_ss58[:12]}.. from {client}")
+                if await miner.blacklist(caller.hotkey_ss58):
+                    logging.warning(f"/forward blacklisted {caller.hotkey_ss58[:12]}.. from {client}")
+                    raise HTTPException(status_code=403, detail="blacklisted")
+                return await miner.forward(body, caller.hotkey_ss58)
+            except HTTPException:
+                raise
+            except Exception as e:
+                logging.error(f"/forward error from {client}: {type(e).__name__}: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+
     def _serve_axon_on_chain(self):
         """Publish the REAL public IP, not gethostname() (which can resolve to 127.0.1.1 on a VPS
         and make the axon unreachable -> zero tasks). Set NIOME_AXON_IP to the box's public IPv4."""
