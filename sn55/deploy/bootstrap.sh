@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Isolated SN55 miner setup. Creates a self-contained workspace under ~/sn55 with its own venv,
 # the pinned validator repo, the solver/miner package, and the reference genome. Touches NOTHING
-# outside ~/sn55 and ~/niome-data. Does NOT install globally, does NOT touch your pm2/tmux/observers,
+# outside ~/sn55. Does NOT install globally, does NOT touch your pm2/tmux/observers,
 # does NOT create a wallet or spend TAO. Idempotent: safe to re-run.
 set -euo pipefail
 PIN=0c03fef2476b56285a202c76cc0d698b62b86b74
-ROOT="$HOME/sn55"; DATA="$HOME/niome-data"
+ROOT="$HOME/sn55"; DATA="$ROOT/data"
 PKG_REMOTE="${PKG_REMOTE:-https://github.com/pedramhatef/pedramhatef.git}"
 PKG_BRANCH="${PKG_BRANCH:-claude/upbeat-turing-wmip3o}"
 log(){ echo "[sn55-bootstrap] $*"; }

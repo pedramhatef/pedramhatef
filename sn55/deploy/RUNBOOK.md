@@ -1,7 +1,7 @@
 # SN55 pilot runbook — Paris box (vps97812493), isolated
 
 Box verified: 3 vCPU / 4.8 GB / 8.6 GB free / Python 3.12.3 / public IPv4 **89.117.2.184**.
-Everything lives under `~/sn55` and `~/niome-data`. **Nothing outside those is touched.** Your MANTIS
+Everything lives under `~/sn55` and `~/sn55/data`. **Nothing outside those is touched.** Your MANTIS
 observers / watchers / pm2 / tmux are not modified. The only TAO spent is the registration burn
 (~0.0005 TAO ≈ $0.11) in **Step 4**, which you run yourself.
 
@@ -58,7 +58,7 @@ public axon IP (not loopback).
    answer (401/403/422, i.e. the server is up), not time out.
 2. **First task captured** — within a round (~3.6 h) the logs should show
    `captured live contract+reference` and `uploaded submission (NNN rows)`. The raw live contract is
-   saved under `~/niome-data/captures/` — **send me one** so I can confirm the live schema matches the
+   saved under `~/sn55/data/captures/` — **send me one** so I can confirm the live schema matches the
    reconstruction (the one thing the pilot verifies). If you instead see `LIVE SCHEMA MISMATCH`, the
    miner safely declined; send me the logged keys and I'll adapt the solver.
 

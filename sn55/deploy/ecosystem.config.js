@@ -14,8 +14,8 @@ module.exports = {
     env: {
       NIOME_REPO: `${HOME}/sn55/subnet-niome`,
       SN55_PKG: `${HOME}/sn55/pkg`,
-      CHR11_FA: `${HOME}/niome-data/chr11.fa`,
-      NIOME_CAPTURE_DIR: `${HOME}/niome-data/captures`,
+      CHR11_FA: `${HOME}/sn55/data/chr11.fa`,
+      NIOME_CAPTURE_DIR: `${HOME}/sn55/data/captures`,
       NIOME_AXON_IP: "89.117.2.184",   // <-- the box's public IPv4; change if it changes
       BT_NO_PARSE_CLI_ARGS: "false"
     }
