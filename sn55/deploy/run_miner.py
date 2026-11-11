@@ -65,7 +65,11 @@ class Sn55Miner(_UpstreamMiner):
         self._serve_axon_on_chain()
         logging.info(f"SN55 miner up: UID {getattr(self, 'uid', '?')}, "
                      f"axon {os.environ.get('NIOME_AXON_IP', '?')}:{self.axon_port}, sync every {SYNC_INTERVAL_S}s")
-        server = uvicorn.Server(uvicorn.Config(self.app, host="0.0.0.0", port=self.axon_port, log_level="warning"))
+        # access_log on so every inbound /forward (incl. validator POSTs, with source IP) is visible,
+        # to diagnose whether validators are reaching the axon. Set NIOME_QUIET=1 to silence it.
+        _acc = os.environ.get("NIOME_QUIET") != "1"
+        server = uvicorn.Server(uvicorn.Config(self.app, host="0.0.0.0", port=self.axon_port,
+                                               log_level="info" if _acc else "warning", access_log=_acc))
         threading.Thread(target=server.run, daemon=True).start()
         try:
             while not self.should_exit:
