@@ -17,7 +17,7 @@ module.exports = {
       CHR11_FA: `${HOME}/sn55/data/chr11.fa`,
       NIOME_CAPTURE_DIR: `${HOME}/sn55/data/captures`,
       NIOME_AXON_IP: "89.117.2.184",   // <-- the box's public IPv4; change if it changes
-      NIOME_AXON_PORT: "8091",
+      NIOME_AXON_PORT: "8080",
       BT_NO_PARSE_CLI_ARGS: "false"
     }
   }]
