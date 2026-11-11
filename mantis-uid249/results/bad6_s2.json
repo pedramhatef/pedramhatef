@@ -1,0 +1,38 @@
+{
+ "T": 32000,
+ "peers": 29,
+ "ahead_rows": 480,
+ "runs": [
+  {
+   "seed": 2,
+   "bad_assets": [
+    1,
+    9,
+    11,
+    15,
+    16,
+    17
+   ],
+   "baseline": {
+    "share": 0.0,
+    "rank": null,
+    "coverage": 1.0
+   },
+   "oracle_abstain": {
+    "share": 0.063367,
+    "rank": 1,
+    "coverage": 0.7
+   },
+   "causal_abstain": {
+    "share": 0.076125,
+    "rank": 1,
+    "coverage": 0.718
+   },
+   "placebo_abstain": {
+    "share": 0.0,
+    "rank": null,
+    "coverage": 0.7
+   }
+  }
+ ]
+}
