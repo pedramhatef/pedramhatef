@@ -1,0 +1,322 @@
+{
+ "url": "http://127.0.0.1:18081/datalog.db",
+ "size": 83456000,
+ "last_modified": "Mon, 09 Nov 2026 03:00:00 GMT",
+ "etag": "\"fx1\"",
+ "accept_ranges": "bytes",
+ "probe_utc": "2026-11-11T22:51:03.502059+00:00",
+ "page_size": 4096,
+ "journal_mode_header": 7,
+ "latest_block_row": {
+  "idx": 59999,
+  "block": 9399995,
+  "sidx": 1879999
+ },
+ "challenge_meta": [],
+ "challenge_rows": [
+  {
+   "ticker": "ETHLBFGS",
+   "sidx": 1880129,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 258,
+   "emb_bytes": 22189,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": true
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "ETHLBFGS",
+   "sidx": 1880130,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 258,
+   "emb_bytes": 22189,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": true
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "ETHLBFGS",
+   "sidx": 1880131,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 257,
+   "emb_bytes": 22189,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": false
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "ETHLBFGS",
+   "sidx": 1880132,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 257,
+   "emb_bytes": 22189,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": false
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "BTCLBFGS",
+   "sidx": 1880129,
+   "row": false
+  },
+  {
+   "ticker": "BTCLBFGS",
+   "sidx": 1880130,
+   "row": false
+  },
+  {
+   "ticker": "BTCLBFGS",
+   "sidx": 1880131,
+   "row": false
+  },
+  {
+   "ticker": "BTCLBFGS",
+   "sidx": 1880132,
+   "row": false
+  },
+  {
+   "ticker": "ETH",
+   "sidx": 1880129,
+   "row": false
+  },
+  {
+   "ticker": "ETH",
+   "sidx": 1880130,
+   "row": false
+  },
+  {
+   "ticker": "ETH",
+   "sidx": 1880131,
+   "row": false
+  },
+  {
+   "ticker": "ETH",
+   "sidx": 1880132,
+   "row": false
+  },
+  {
+   "ticker": "ETHHITFIRST",
+   "sidx": 1880129,
+   "row": false
+  },
+  {
+   "ticker": "ETHHITFIRST",
+   "sidx": 1880130,
+   "row": false
+  },
+  {
+   "ticker": "ETHHITFIRST",
+   "sidx": 1880131,
+   "row": false
+  },
+  {
+   "ticker": "ETHHITFIRST",
+   "sidx": 1880132,
+   "row": false
+  },
+  {
+   "ticker": "FUNDINGXSEC",
+   "sidx": 1880129,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 258,
+   "emb_bytes": 23737,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": true
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "FUNDINGXSEC",
+   "sidx": 1880130,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 258,
+   "emb_bytes": 23737,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": true
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "FUNDINGXSEC",
+   "sidx": 1880131,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 257,
+   "emb_bytes": 23737,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": false
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "FUNDINGXSEC",
+   "sidx": 1880132,
+   "row": true,
+   "n_hotkeys_listed": 258,
+   "n_embedded": 258,
+   "n_nonzero": 257,
+   "emb_bytes": 23737,
+   "watch": {
+    "5EnMAEVG": {
+     "listed": true,
+     "nonzero": false
+    },
+    "5Eq8YZzy": {
+     "listed": true,
+     "nonzero": true
+    }
+   }
+  },
+  {
+   "ticker": "MULTIXSEC",
+   "sidx": 1880129,
+   "row": false
+  },
+  {
+   "ticker": "MULTIXSEC",
+   "sidx": 1880130,
+   "row": false
+  },
+  {
+   "ticker": "MULTIXSEC",
+   "sidx": 1880131,
+   "row": false
+  },
+  {
+   "ticker": "MULTIXSEC",
+   "sidx": 1880132,
+   "row": false
+  },
+  {
+   "ticker": "MULTIBREAKOUT",
+   "sidx": 1880129,
+   "row": false
+  },
+  {
+   "ticker": "MULTIBREAKOUT",
+   "sidx": 1880130,
+   "row": false
+  },
+  {
+   "ticker": "MULTIBREAKOUT",
+   "sidx": 1880131,
+   "row": false
+  },
+  {
+   "ticker": "MULTIBREAKOUT",
+   "sidx": 1880132,
+   "row": false
+  }
+ ],
+ "raw_payload_seeks_for_hotkey": [
+  {
+   "ts": 59999,
+   "block": 9399995,
+   "present": true,
+   "len": 779,
+   "v": 2,
+   "round": 60122,
+   "hk_match": true,
+   "owner_pk_match": true
+  },
+  {
+   "ts": 59998,
+   "block": 9399990,
+   "present": true,
+   "len": 779,
+   "v": 2,
+   "round": 60121,
+   "hk_match": true,
+   "owner_pk_match": true
+  },
+  {
+   "ts": 59989,
+   "block": 9399945,
+   "present": true,
+   "len": 779,
+   "v": 2,
+   "round": 60112,
+   "hk_match": true,
+   "owner_pk_match": true
+  },
+  {
+   "ts": 59899,
+   "block": 9399495,
+   "present": true,
+   "len": 779,
+   "v": 2,
+   "round": 60022,
+   "hk_match": true,
+   "owner_pk_match": true
+  },
+  {
+   "ts": 58999,
+   "present": false
+  },
+  {
+   "ts": 54999,
+   "present": false
+  }
+ ],
+ "bytes_fetched": 1536000,
+ "range_requests": 24
+}

@@ -1,5 +1,8 @@
 # UID249 recovery: investigation report (independent review copy)
 
+> **Superseded in part (2026-11-12):** the Paris real-field audit REJECTED F1 (§3): capped-at-3 share 8.552% → 8.225%. See `REPORT_ROUND2.md`. §2 is refined there using the corrected archive timeline.
+
+
 Run: 2026-11-11, about 21:55–22:15 UTC, in a cloud session that is **not** the Paris investigator VPS.
 Scope: read-only. Nothing in production, wallets, timelock, collateral, PM2 or R2 was touched.
 
