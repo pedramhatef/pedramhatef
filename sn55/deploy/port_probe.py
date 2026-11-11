@@ -38,19 +38,22 @@ def listener(p, stop):
             break
     srv.close()
 
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+
+def _get(url):
+    req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": UA})
+    return json.load(urllib.request.urlopen(req, timeout=25))
+
 def check_host(ipport):
-    req = urllib.request.Request(
-        f"https://check-host.net/check-tcp?host={ipport}&max_nodes=6",
-        headers={"Accept": "application/json"})
-    r = json.load(urllib.request.urlopen(req, timeout=25))
+    r = _get(f"https://check-host.net/check-tcp?host={ipport}&max_nodes=6")
     rid = r.get("request_id")
     if not rid:
         return None
     res = {}
     for _ in range(12):
         time.sleep(3)
-        res = json.load(urllib.request.urlopen(
-            f"https://check-host.net/check-result/{rid}", timeout=25))
+        res = _get(f"https://check-host.net/check-result/{rid}")
         if res and all(v is not None for v in res.values()):
             break
     out = {"open": 0, "refused": 0, "timeout": 0, "other": 0, "pending": 0}
