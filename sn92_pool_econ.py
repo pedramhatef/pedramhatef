@@ -48,14 +48,47 @@ def _first(*fns):
 
 
 def _f(x) -> float:
-    for attr in ("tao", "amount"):
-        if hasattr(x, attr):
-            x = getattr(x, attr)
-            break
+    """Number from a float/int or an SDK Balance (TAO or subnet alpha; .tao raises on alpha in SDK 11)."""
+    if isinstance(x, (int, float)):
+        return float(x)
+    for attr in ("tao", "alpha"):
+        try:
+            return float(getattr(x, attr))
+        except Exception:  # noqa: BLE001 - wrong unit or missing attribute: try the next one
+            continue
     try:
         return float(x)
-    except (TypeError, ValueError):
+    except Exception:  # noqa: BLE001
         return 0.0
+
+
+def _commit_text(c) -> str:
+    """Plaintext of an SDK NeuronCommitment (value/data and hex Raw fields), or a plain string."""
+    if c is None:
+        return ""
+    if isinstance(c, str):
+        return c
+    parts = []
+    v = getattr(c, "value", None)
+    try:
+        v = v() if callable(v) else v
+    except Exception:  # noqa: BLE001
+        v = None
+    for x in (v, getattr(c, "data", None)):
+        if isinstance(x, str):
+            parts.append(x)
+    fields = getattr(c, "fields", None)
+    if isinstance(fields, (list, tuple)):
+        for entry in fields:
+            if isinstance(entry, dict):
+                for val in entry.values():
+                    if isinstance(val, str):
+                        try:
+                            parts.append(bytes.fromhex(val.removeprefix("0x")).decode("utf-8", "replace"))
+                        except ValueError:
+                            pass
+    parts.append(str(c))
+    return " ".join(parts)
 
 
 def fetch(network: str) -> dict:
@@ -65,13 +98,15 @@ def fetch(network: str) -> dict:
     mg = _first(lambda: st.subnets.metagraph(NETUID, commitments=True), lambda: st.metagraph(NETUID))
     if mg is None:
         sys.exit("could not read the metagraph")
-    commits = _first(lambda: st.get_all_commitments(NETUID), lambda: st.commitments.get_all_commitments(NETUID)) or {}
+    commits = {}
+    if not any(getattr(n, "commitment", None) for n in mg.neurons):
+        commits = _first(lambda: st.get_all_commitments(NETUID), lambda: st.commitments.get_all_commitments(NETUID)) or {}
     rows = []
     for n in mg.neurons:
         uid = int(n.uid)
         inc = _first(lambda: n.incentive, lambda: mg.I[uid])
         em = _first(lambda: n.emission, lambda: mg.E[uid])
-        text = str(getattr(n, "commitment", "") or "") + " " + str(commits.get(str(n.hotkey), ""))
+        text = _commit_text(getattr(n, "commitment", None)) + " " + _commit_text(commits.get(str(n.hotkey)))
         rows.append(dict(uid=uid, hotkey=str(n.hotkey), coldkey=str(n.coldkey), incentive=_f(inc),
                          emission=_f(em), vpermit=bool(getattr(n, "validator_permit", False)),
                          reg_block=int(getattr(n, "block_at_registration", 0) or 0), commit=text))
