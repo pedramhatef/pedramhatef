@@ -37,7 +37,12 @@ def official_score(submission, contract, reference, cell_types, seeds, workdir):
     from niome_subnet.genomics.validation import benchmark_submission
     d = os.path.join(workdir, "data"); os.makedirs(d, exist_ok=True)
     link = os.path.join(d, "chr11.fa")
-    if not os.path.exists(link): os.symlink(os.path.abspath(CHR11), link)
+    want = os.path.abspath(CHR11)
+    if os.path.islink(link) or os.path.exists(link):
+        if not (os.path.islink(link) and os.readlink(link) == want):
+            os.remove(link); os.symlink(want, link)
+    else:
+        os.symlink(want, link)
     json.dump(contract, open(os.path.join(d, "contract.json"), "w"))
     json.dump(reference, open(os.path.join(d, "hbb_reference.json"), "w"))
     json.dump(submission, open(os.path.join(d, "submission.json"), "w"))
