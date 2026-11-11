@@ -21,9 +21,13 @@ for p in (SN55_PKG, NIOME_REPO):
 os.environ.setdefault("BT_NO_PARSE_CLI_ARGS", "false")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+import threading
 import bittensor as bt
+import uvicorn
 from neurons.miner import Miner as _UpstreamMiner        # official, unmodified
 from miner.process_task import process_task as _process_task
+
+SYNC_INTERVAL_S = int(os.environ.get("NIOME_SYNC_INTERVAL_S", "60"))
 
 
 class Sn55Miner(_UpstreamMiner):
@@ -52,6 +56,39 @@ class Sn55Miner(_UpstreamMiner):
             logging.info(f"served axon {ip}:{self.axon_port} on netuid {self.config.netuid}")
         except Exception as e:
             logging.error(f"failed to serve axon: {e}")
+
+    def run(self):
+        """Replace the upstream run loop, whose throttle (block - last_update < epoch_length)
+        busy-loops for a fresh miner whose last_update never advances. Here the loop simply syncs
+        every SYNC_INTERVAL_S seconds; the axon server thread handles /forward independently."""
+        self.sync()
+        self._serve_axon_on_chain()
+        logging.info(f"SN55 miner up: UID {getattr(self, 'uid', '?')}, "
+                     f"axon {os.environ.get('NIOME_AXON_IP', '?')}:{self.axon_port}, sync every {SYNC_INTERVAL_S}s")
+        server = uvicorn.Server(uvicorn.Config(self.app, host="0.0.0.0", port=self.axon_port, log_level="warning"))
+        threading.Thread(target=server.run, daemon=True).start()
+        try:
+            while not self.should_exit:
+                try:
+                    import time
+                    for _ in range(SYNC_INTERVAL_S):
+                        if self.should_exit:
+                            break
+                        time.sleep(1)
+                    if self.should_exit:
+                        break
+                    self.sync()
+                    self.step += 1
+                except KeyboardInterrupt:
+                    raise
+                except Exception as err:
+                    logging.warning(f"miner step error (retry in 12s): {err}")
+                    import time
+                    time.sleep(12)
+        except KeyboardInterrupt:
+            logging.info("SN55 miner stopped by keyboard interrupt")
+        finally:
+            server.should_exit = True
 
 
 if __name__ == "__main__":
