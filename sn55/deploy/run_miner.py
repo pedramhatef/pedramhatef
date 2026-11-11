@@ -29,6 +29,13 @@ from miner.process_task import process_task as _process_task
 class Sn55Miner(_UpstreamMiner):
     process_task = _process_task                          # override just the solver hook
 
+    def __init__(self, config=None):
+        super().__init__(config=config)
+        # The upstream --axon.port flag does not register under bittensor 11, so set the port
+        # from NIOME_AXON_PORT (default 8091). Applied after super().__init__ so both the uvicorn
+        # bind and the on-chain ServeAxon use it.
+        self.axon_port = int(os.environ.get("NIOME_AXON_PORT", "8091"))
+
     def _serve_axon_on_chain(self):
         """Publish the REAL public IP, not gethostname() (which can resolve to 127.0.1.1 on a VPS
         and make the axon unreachable -> zero tasks). Set NIOME_AXON_IP to the box's public IPv4."""

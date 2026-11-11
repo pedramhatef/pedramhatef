@@ -6,7 +6,7 @@ module.exports = {
     name: "niome-sn55",
     script: `${HOME}/sn55/venv/bin/python`,
     args: "deploy/run_miner.py --netuid 55 --subtensor.network finney " +
-          "--wallet.name niome_cold --wallet.hotkey niome_hot --axon.port 8191",
+          "--wallet niome_cold --wallet-hotkey niome_hot",
     cwd: `${HOME}/sn55/pkg`,
     interpreter: "none",
     max_memory_restart: "1500M",
@@ -17,6 +17,7 @@ module.exports = {
       CHR11_FA: `${HOME}/sn55/data/chr11.fa`,
       NIOME_CAPTURE_DIR: `${HOME}/sn55/data/captures`,
       NIOME_AXON_IP: "89.117.2.184",   // <-- the box's public IPv4; change if it changes
+      NIOME_AXON_PORT: "8091",
       BT_NO_PARSE_CLI_ARGS: "false"
     }
   }]
