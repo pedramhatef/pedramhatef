@@ -1,0 +1,4 @@
+# Runtime for the miner (the CliqueAI repository pins bittensor==10.3.2, numpy==2.2.6 — install that first, then this).
+numpy>=1.26
+# Analysis / tests only
+pytest>=8
