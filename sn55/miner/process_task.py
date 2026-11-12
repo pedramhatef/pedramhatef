@@ -53,8 +53,43 @@ def _validate(contract: dict, reference: dict) -> list:
     return missing
 
 
+# Storage hosts the real NIOME backend hands out presigned URLs for.
+TRUSTED_UPLOAD_HOSTS = ("amazonaws.com", "googleapis.com", "genomes.io", "storage.cloud.google.com")
+
+
+def _host(url: str) -> str:
+    from urllib.parse import urlparse
+    try:
+        return (urlparse(url).hostname or "?").lower()
+    except Exception:
+        return "?"
+
+
+def _check_origin(contract_url: str, hbb_ref_url: str, presigned_url: str) -> bool:
+    """Log where the task came from and where our submission would go.
+
+    The upload target is what matters: if it is not legitimate backend storage, somebody is
+    harvesting our work. Returns False when the upload host is untrusted AND
+    NIOME_STRICT_UPLOAD_HOST=1 is set (default: warn loudly but proceed).
+    """
+    ch, rh, uh = _host(contract_url), _host(hbb_ref_url), _host(presigned_url)
+    logging.info(f"task origin: contract={ch} reference={rh} | UPLOAD TARGET={uh}")
+    trusted = any(uh == h or uh.endswith("." + h) for h in TRUSTED_UPLOAD_HOSTS)
+    if not trusted:
+        logging.warning(
+            f"UNTRUSTED UPLOAD HOST '{uh}' — not a known NIOME storage host "
+            f"({', '.join(TRUSTED_UPLOAD_HOSTS)}). This task may be from an impostor trying to "
+            f"harvest your submission. Set NIOME_STRICT_UPLOAD_HOST=1 to refuse these.")
+        if os.environ.get("NIOME_STRICT_UPLOAD_HOST") == "1":
+            logging.error(f"REFUSING to upload to untrusted host '{uh}' (strict mode)")
+            return False
+    return True
+
+
 def build_and_upload(contract_url: str, hbb_ref_url: str, presigned_url: str) -> bool:
     t0 = time.time()
+    if not _check_origin(contract_url, hbb_ref_url, presigned_url):
+        return False
     contract = _download_json(contract_url)
     reference = _download_json(hbb_ref_url)
     _capture(contract, reference)

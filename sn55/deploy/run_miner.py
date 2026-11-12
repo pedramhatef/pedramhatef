@@ -40,6 +40,43 @@ class Sn55Miner(_UpstreamMiner):
         # bind and the on-chain ServeAxon use it.
         self.axon_port = int(os.environ.get("NIOME_AXON_PORT", "8091"))
 
+    def _caller_verdict(self, hotkey: str) -> str:
+        """Identify an authenticated caller against the metagraph.
+
+        The signature is already cryptographically verified, so the hotkey is certain. Real
+        validators hold a validator_permit, large stake and nonzero dividends; an abusing miner
+        UID would not. With NIOME_REQUIRE_VALIDATOR=1 a non-permitted caller is refused outright.
+        """
+        try:
+            if hotkey not in self.metagraph.hotkeys:
+                return "UNREGISTERED on netuid 55 -> SUSPICIOUS, do not trust this task"
+            uid = self.metagraph.hotkeys.index(hotkey)
+            n = self.metagraph.neurons[uid]
+            permit, div = bool(n.validator_permit), float(n.dividends)
+            if permit and div > 0:
+                verdict = "REAL VALIDATOR (permit + dividends)"
+            elif permit:
+                verdict = "has validator permit, no dividends yet -> probably genuine"
+            elif div > 0:
+                verdict = "no permit but earns dividends -> unusual, inspect"
+            else:
+                verdict = "NO PERMIT, NO DIVIDENDS -> SUSPICIOUS, likely not a validator"
+            return (f"uid={uid} permit={permit} stake={n.total_stake} dividends={div:.4f} "
+                    f"trust={float(n.trust):.3f} -> {verdict}")
+        except Exception as e:
+            return f"caller lookup failed: {type(e).__name__}: {e}"
+
+    def is_trusted_caller(self, hotkey: str) -> bool:
+        """True unless NIOME_REQUIRE_VALIDATOR=1 and the caller lacks a validator permit."""
+        if os.environ.get("NIOME_REQUIRE_VALIDATOR") != "1":
+            return True
+        try:
+            if hotkey not in self.metagraph.hotkeys:
+                return False
+            return bool(self.metagraph.neurons[self.metagraph.hotkeys.index(hotkey)].validator_permit)
+        except Exception:
+            return False
+
     def _setup_routes(self):
         """Replace the upstream /forward route.
 
@@ -81,10 +118,15 @@ class Sn55Miner(_UpstreamMiner):
                 except bt.http_auth.AuthError as e:
                     logging.warning(f"/forward AUTH FAILED from {client}: {type(e).__name__}: {e}")
                     raise HTTPException(status_code=401, detail=str(e))
-                logging.info(f"/forward authenticated caller {caller.hotkey_ss58[:12]}.. from {client}")
+                logging.info(f"/forward authenticated caller {caller.hotkey_ss58[:12]}.. from {client} "
+                             f"| {miner._caller_verdict(caller.hotkey_ss58)}")
                 if await miner.blacklist(caller.hotkey_ss58):
                     logging.warning(f"/forward blacklisted {caller.hotkey_ss58[:12]}.. from {client}")
                     raise HTTPException(status_code=403, detail="blacklisted")
+                if not miner.is_trusted_caller(caller.hotkey_ss58):
+                    logging.warning(f"/forward REFUSED {caller.hotkey_ss58[:12]}.. from {client}: "
+                                    "NIOME_REQUIRE_VALIDATOR=1 and caller has no validator permit")
+                    raise HTTPException(status_code=403, detail="validator permit required")
                 return await miner.forward(body, caller.hotkey_ss58)
             except HTTPException:
                 raise
