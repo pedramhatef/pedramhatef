@@ -114,3 +114,23 @@ Be reachable and authenticating during a broadcast window (first ~500 blocks of 
 capture one real task. Then: verify the live contract schema against `harness/synth.py`, read the
 score when that round's weights land, and turn on the two hardening switches using the confirmed
 validator hotkey and upload host.
+
+## First real scored task — 2026-11-12 05:47Z
+
+- **Owner validator UID 119** (`5DJ5fT174AY8…`, the `OWNER_HOTKEY`) from `209.209.8.121`
+  authenticated, sent task `8a8c2c7d-9d67-46cf-8faf-d7ee7c5a43a6`; contract/reference on
+  `drive.usercontent.google.com`, upload target `www.googleapis.com`. Uploaded 250 rows in 5.56 s.
+  **Both auth fixes (#5, #6) confirmed against the real validator.**
+- **Live contract differs sharply from the reconstruction** (`evidence/live_task_20261112/`):
+  2 mutations with HGVS names (`HBB:c.359G>A` w=1.155, `NC_000011.10:g.5226539G>A` w=0.65),
+  cell type `HUDEP-2`, `base_padding=400`, **`proximity_gate=false`**, `max_experiments=250`;
+  reference carries `window_id`, `chromosome`, and a `challenge` block mirroring the contract.
+  The solver read it dynamically and produced **250/250 valid rows** (official scorer).
+- **Weakness it exposed:** candidate sites were ranked GC-first. With the gate off the window is
+  ±2000 bp and `dist_score = exp(-d/400)`, so far perfect-GC sites crowded out near ones
+  (median distance 841 bp). Fixed by ranking on the true stage-2 score
+  `(0.625·gc + 0.375·exp(-d/bp))·offtarget`. On the live contract, official scorer, 8 seed-rounds:
+  **13.03 → 14.32 (+9.9%)**; median distance 841 → 276 bp. Non-regressive on all 12 synthetic
+  contract shapes (+0.0% to +4.7%).
+- The uploaded submission for this round used the old ranking (~13.0); the fix applies from the
+  next round.

@@ -1,0 +1,6 @@
+{"seed": 0, "version": "v1",
+ "active_mutations": ["HBB:c.359G>A", "NC_000011.10:g.5226539G>A"],
+ "mutation_weights": {"HBB:c.359G>A": 1.155, "NC_000011.10:g.5226539G>A": 0.65},
+ "mutation_regions": {"HBB:c.359G>A": "exon3", "NC_000011.10:g.5226539G>A": null},
+ "cell_type": "HUDEP-2",
+ "rules": {"base_padding": 400, "max_mismatches": 3, "cas_systems": ["Cas9", "Cas12a"], "proximity_gate": false, "max_experiments": 250}}

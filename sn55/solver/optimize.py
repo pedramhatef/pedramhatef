@@ -2,8 +2,17 @@
 then build the balanced submission under that allocation. Coverage entropy is logarithmic and
 forgiving, so a mild tilt toward high-weight mutations raises TWS with little DFF loss."""
 from solver import core, fastscore
+import math
 
-def build_tilted(seq, contract, reference, tilt, L=20):
+
+def row_score(site, mpos, cas, base_padding, kidx):
+    """Stage-2 structural score of a candidate (start, guide, gc_score), mutation-weight excluded."""
+    start, guide, gsc = site
+    dsc = math.exp(-abs(start - mpos) / base_padding)
+    ot = fastscore.offtarget_factor(guide, cas, kidx) if kidx is not None else 1.0
+    return (0.625 * gsc + 0.375 * dsc) * ot
+
+def build_tilted(seq, contract, reference, tilt, L=20, kidx=None):
     """tilt=0 -> equal rows per mutation; tilt=1 -> rows ~ proportional to mutation_weight."""
     import math
     rules = contract["rules"]; muts = contract["active_mutations"]
@@ -17,7 +26,11 @@ def build_tilted(seq, contract, reference, tilt, L=20):
         for cas in cas_systems:
             for strand in ("+", "-"):
                 s = core.candidate_sites(seq, mmap[m], cas, strand, bp, pg, L)
-                s.sort(key=lambda x: (-x[2], abs(x[0] - mmap[m])))
+                # Rank by the row's actual stage-2 structural score, not GC alone. With
+                # proximity_gate=false the candidate window is wide and dist_score decays as
+                # exp(-d/base_padding), so a far perfect-GC site can be worth far less than a
+                # near one. (The live contract exposed this: base_padding=400, gate off.)
+                s.sort(key=lambda x: -row_score(x, mmap[m], cas, bp, kidx))
                 cells[(m, cas, strand)] = s
     used_g, used_k, rows = set(), set(), []
     # Within each mutation, round-robin its cas x strand cells so coverage stays balanced.
@@ -60,7 +73,7 @@ def build_tilted(seq, contract, reference, tilt, L=20):
 def optimize(seq, contract, reference, tilts=(0.0, 0.5, 1.0, 1.5, 2.0, 3.0), kidx=None):
     best = None
     for t in tilts:
-        sub = build_tilted(seq, contract, reference, t)
+        sub = build_tilted(seq, contract, reference, t, kidx=kidx)
         fr = fastscore.score_fast(seq, sub, contract, reference, kidx=kidx)
         if best is None or fr["final_noCF"] > best[1]["final_noCF"]:
             best = (t, fr, sub)
