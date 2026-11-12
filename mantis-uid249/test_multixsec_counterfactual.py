@@ -83,3 +83,22 @@ def test_segment_replica_matches_scorer(scorer, T, sl):
         assert rep == [(16000, 16060, 24000)]
     if sl == slice(8000, 32240):
         assert rep == [(24000, 24060, 32000)]
+
+
+def test_inplace_swap_restores_input_and_matches_copy_path(scorer):
+    prices, X, hks, f = world(17500, H=6, zero_cols=1, seed=5)
+    X = np.ascontiguousarray(X, dtype=np.float32)
+    before = X.copy()
+    j = 2
+    col = mc.build_candidate(prices, f, X[:, j, :].astype(float), "V1")
+    got = mc.scored_with_column(scorer, X, slice(0, None), j, col, hks, prices)
+    assert np.array_equal(X, before)                          # input restored exactly
+    Xc = before.copy(); Xc[:, j, :] = col                     # reference: explicit copy path
+    ref = scorer.compute_xsec_rank_salience((Xc.reshape(Xc.shape[0], -1), {h: i for i, h in enumerate(hks)}), prices, 1200, 5)
+    assert got == ref
+
+
+def test_memory_preflight_formula_matches_probes():
+    # Measured peak MB on the pinned scorer at T=32805 (this session): H=16 811, H=32 1123, H=64 1751.
+    for H, meas in ((16, 811), (32, 1123), (64, 1751)):
+        assert abs(mc.predicted_peak_bytes(32805, H) / 2**20 - meas) / meas < 0.03

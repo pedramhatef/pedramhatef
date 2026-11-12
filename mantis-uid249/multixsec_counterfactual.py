@@ -149,13 +149,44 @@ DROP_ZERO_COLS = False
 
 
 def score(scorer, X: np.ndarray, hks: list[str], prices: np.ndarray, drop_zero=None) -> dict:
-    """X: (T, H, 33). Calls the pinned scorer; optionally drops all-zero columns (numerically, not bit, equal)."""
+    """X: (T, H, 33). Calls the pinned scorer. Default path passes a VIEW (no copy) when X is C-contiguous
+    float32; optionally drops all-zero columns (numerically, not bit, equal)."""
     drop = DROP_ZERO_COLS if drop_zero is None else drop_zero
-    keep = np.flatnonzero(np.any(X != 0, axis=(0, 2))) if drop else np.arange(X.shape[1])
-    Xk = X[:, keep, :]
-    hk2idx = {hks[k]: i for i, k in enumerate(keep)}
-    flat = Xk.reshape(Xk.shape[0], -1).astype(np.float32)
+    if drop:
+        keep = np.flatnonzero(np.any(X != 0, axis=(0, 2)))
+        Xk = X[:, keep, :]
+        hk2idx = {hks[k]: i for i, k in enumerate(keep)}
+    else:
+        Xk = X
+        hk2idx = {h: i for i, h in enumerate(hks)}
+    flat = np.ascontiguousarray(Xk, dtype=np.float32).reshape(Xk.shape[0], -1)
     return scorer.compute_xsec_rank_salience((flat, hk2idx), prices, 1200, 5)
+
+
+def predicted_peak_bytes(T: int, H: int) -> int:
+    """Calibrated on the pinned scorer (T=32805, A=33, H=16/32/64; fits all six probes within 1%)."""
+    return int(0.5 * 2**30 + 4.6 * T * H * 33 * 4)
+
+
+def mem_available_bytes() -> int | None:
+    try:
+        for line in open("/proc/meminfo"):
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) * 1024
+    except OSError:
+        return None
+    return None
+
+
+def scored_with_column(scorer, X, sl, j, col, hks, prices):
+    """Swap the target column in place for this run and always restore it (no full-field copy)."""
+    view = X[sl]
+    saved = view[:, j, :].copy()
+    try:
+        view[:, j, :] = col[sl]
+        return score(scorer, view, hks, prices[sl])
+    finally:
+        view[:, j, :] = saved
 
 
 def share_rank(sal: dict, hk: str):
@@ -179,8 +210,7 @@ def run(scorer, X, hks, prices, funding33, target, variants, folds):
         n = len(range(*sl.indices(T)))
         out[fname] = {"_scorable_segments": scorable_segments(n, sl.start or 0)}
         for v, col in cols.items():
-            Xv = X[sl].copy(); Xv[:, j, :] = col[sl]
-            out[fname][v] = share_rank(score(scorer, Xv, hks, prices[sl]), target)
+            out[fname][v] = share_rank(scored_with_column(scorer, X, sl, j, col, hks, prices), target)
     cov = {v: round(float((c != 0).mean()), 4) for v, c in cols.items()}
     return out, cov, cols
 
@@ -195,8 +225,7 @@ def daily(scorer, X, hks, prices, ts, target, cols, variants, n_boot=2000, seed=
     for e in ends:
         r = {"end_row": e, "end_utc": datetime.fromtimestamp(float(ts[e - 1]), timezone.utc).isoformat()}
         for v in ["baseline"] + variants:
-            Xv = X[:e].copy(); Xv[:, j, :] = cols[v][:e]
-            r[v] = share_rank(score(scorer, Xv, hks, prices[:e]), target)[0]
+            r[v] = share_rank(scored_with_column(scorer, X, slice(0, e), j, cols[v], hks, prices), target)[0]
         rows.append(r)
     rng = np.random.default_rng(seed)
     ci = {}
@@ -218,6 +247,8 @@ def main(argv=None):
     ap.add_argument("--folds", default="F1,F2,FULL")
     ap.add_argument("--daily", action="store_true")
     ap.add_argument("--drop-zero-cols", action="store_true")
+    ap.add_argument("--mem-fraction", type=float, default=0.85,
+                    help="refuse to run if the predicted peak exceeds this fraction of MemAvailable")
     ap.add_argument("--out", default="multixsec_result.json")
     a = ap.parse_args(argv)
     global DROP_ZERO_COLS
@@ -228,7 +259,15 @@ def main(argv=None):
     scorer.tqdm = lambda *x, **k: type("N", (), {"update": lambda s, n=1: None, "close": lambda s: None})()
     src = open(scorer.__file__, "rb").read()
     z = np.load(a.npz, allow_pickle=False)
-    prices, X, hks, ts = z["prices"], z["multixsec"], [str(h) for h in z["hotkeys"]], z["capture_ts"]
+    hks = [str(h) for h in z["hotkeys"]]
+    T_, H_ = int(z["capture_ts"].shape[0]), len(hks)
+    need, avail = predicted_peak_bytes(T_, H_), mem_available_bytes()
+    print(json.dumps({"preflight": {"T": T_, "H": H_, "predicted_peak_GiB": round(need / 2**30, 2),
+                                    "mem_available_GiB": round(avail / 2**30, 2) if avail else None}}))
+    if avail is None or need > a.mem_fraction * avail:
+        raise SystemExit(f"STOP: predicted peak {need/2**30:.2f} GiB exceeds {a.mem_fraction:.0%} of MemAvailable "
+                         f"({(avail or 0)/2**30:.2f} GiB). Not running; no rows or peers dropped.")
+    prices, X, ts = z["prices"], np.ascontiguousarray(z["multixsec"], dtype=np.float32), z["capture_ts"]
     funding33 = z["funding33"] if "funding33" in z.files else np.full(prices.shape, np.nan)
     res = {"utc": datetime.now(timezone.utc).isoformat(),
            "scorer_sha256": hashlib.sha256(src).hexdigest(),
