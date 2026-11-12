@@ -203,7 +203,10 @@ def match(x: np.ndarray, T: np.ndarray, settled: list[tuple[float, float]]) -> d
     best = None
     for d in range(0, RULE["max_pub_delay_s"] + 1, 60):
         k = np.searchsorted(T, taus + d, side="left")
-        post = np.where(k < T.size, x[np.clip(k, 0, T.size - 1)], np.nan)
+        nearest = np.clip(k, 0, T.size - 1)
+        actual_lag_s = T[nearest] - taus
+        within_deadline = (k < T.size) & (actual_lag_s >= 0) & (actual_lag_s <= RULE["max_pub_delay_s"])
+        post = np.where(within_deadline, x[nearest], np.nan)
         st = stats(post, vr) | {"delay_s": d}
         if st.get("n", 0) >= 3 and (best is None or st["close_frac"] > best["close_frac"]):
             best = st
