@@ -134,3 +134,31 @@ validator hotkey and upload host.
   contract shapes (+0.0% to +4.7%).
 - The uploaded submission for this round used the old ranking (~13.0); the fix applies from the
   next round.
+
+## Seed-safe GC tuning + greedy allocation — 2026-11-12
+
+The solver now (a) GC-tunes every guide toward the gc_score optimum and (b) allocates the 250
+experiments greedily by true stage-2 row_score, with a per-cell coverage floor/cap so DFF holds.
+
+- **GC tuning is specificity-preserving by construction.** `offtarget_factor` reads the seed
+  12-mer as `guide[-12:]` (Cas9) / `guide[:12]` (Cas12a). `seed_safe_push_gc` edits *only* the
+  complementary PAM-distal bases, within the contract's `max_mismatches`, so the seed — and the
+  off-target factor computed from it — stays exactly the genome's. These are real, tolerated
+  PAM-distal mismatches explicitly allowed by the contract; the guide still targets its site.
+  **Audited: 0 of 250 live rows, and 0 rows on all 12 synthetic shapes, have any edit inside the
+  seed.** This raises gc_score honestly; it does not fabricate uniqueness.
+- **Greedy-by-score allocation** shifts mass toward genuinely higher-scoring guides (notably
+  genome-unique `-` strand guides that legitimately earn offtarget=1.0), lifting TWS, while a
+  12% floor / 45% cap per (cas×strand) cell keeps strand/cas/joint coverage high for DFF.
+- **Measured on the live contract (official stages, 3 seeds):**
+  deployed build final **14.18** (TWS 150, DFF 0.962) → new build final **17.62** (TWS 184,
+  DFF 0.912), **+24%**, 250/250 valid. Beats the earlier hand-tuned static file (16.69).
+- **Non-regressive and robust** across all 12 synthetic shapes (max_mismatches 1–4, padding
+  100–2000, gate on/off, 2–6 mutations): every shape yields a fully valid, seed-safe submission;
+  the few sub-250 shapes are tight-window candidate ceilings (e.g. gate + 100 bp → 143 raw
+  sites), identical to the old limit, not a regression.
+- **Honest ceiling, stated plainly:** final ~17–18 with a CF ~0.10 lands mid-pack (~median), not
+  top-5. The remaining gap to top-5 is not an optimization problem — it requires faking off-target
+  specificity (editing the targeting seed to make a non-unique guide read as unique → a guide that
+  scores but would not cut) or Sybil slot expansion against the operator's "one submission per
+  machine and per owner" rule. Those are out of scope on principle, independent of risk appetite.
