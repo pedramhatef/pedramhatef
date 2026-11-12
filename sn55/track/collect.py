@@ -7,8 +7,10 @@ Writes newline-delimited JSON under TRACK_DIR (default ~/sn55/data/track):
   predictions.jsonl one record per captured task we solved: predicted base + CF distribution.
 
 Idempotent: a task_id already in rounds.jsonl is not re-appended unless its score changed. Safe to
-run under nohup/watchdog. Read-only against the chain and the public leaderboard; no wallet use
-beyond the OPTIONAL signed GET of our own scores (reusing the miner hotkey already on the box).
+run under nohup/watchdog. Read-only against the chain and the public leaderboard. It does NOT use
+any wallet by default: the leaderboard GET is unsigned, and signing is strictly opt-in via
+SN55_SIGN=1 (or SN55_SIGN_WALLET/SN55_SIGN_HOTKEY) — never triggered merely by SN55_OUR_HOTKEY,
+which only matches our rows. Default operation touches no wallet and submits nothing.
 """
 import os, sys, json, time, glob, datetime as dt
 
@@ -48,7 +50,12 @@ def _append(path, rec):
 
 
 def _wallet():
-    if not OUR_HOTKEY and not os.environ.get("SN55_SIGN_WALLET"):
+    """Return a signing wallet ONLY when signing is explicitly opted into via SN55_SIGN=1 (or a
+    SN55_SIGN_WALLET / SN55_SIGN_HOTKEY env var). Knowing our own hotkey (SN55_OUR_HOTKEY, used only
+    to match our rows on the public leaderboard) must NEVER cause wallet use. The leaderboard GET is
+    public; default operation is strictly unsigned and touches no wallet."""
+    if os.environ.get("SN55_SIGN") != "1" and not os.environ.get("SN55_SIGN_WALLET") \
+       and not os.environ.get("SN55_SIGN_HOTKEY"):
         return None
     try:
         import bittensor as bt
@@ -64,7 +71,9 @@ def poll_leaderboard():
     try:
         rows = LB.fetch_scores(wallet=_wallet())
     except Exception as e:
-        print(f"{_now()} leaderboard fetch failed: {e}"); return 0
+        hint = " (if this is a 401, the endpoint wants a signature; signing is opt-in only — " \
+               "set SN55_SIGN=1 deliberately, it is never enabled automatically)" if "401" in str(e) else ""
+        print(f"{_now()} leaderboard fetch failed: {e}{hint}"); return 0
     rounds = LB.group_rounds(rows)
     added = 0
     for tid, rnd in rounds.items():
