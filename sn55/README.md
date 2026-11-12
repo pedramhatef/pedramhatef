@@ -1,6 +1,6 @@
 # SN55 (NIOME) — feasibility study + CPU-first miner
 
-Full findings: **[REPORT.md](REPORT.md)**. Verdict: **PILOT GO** (one cheap single-UID mainnet test).
+Full findings: **[REPORT.md](REPORT.md)** (pre-deployment research) and **[PILOT_LOG.md](PILOT_LOG.md)** (live deployment: state, the six zero-reward bugs, subnet behaviour). Verdict: **PILOT GO** — registered UID 96, live since 2026-11-11.
 
 ```
 harness/   synth.py        synthetic contract/reference builder (labelled; coords real GRCh38)
