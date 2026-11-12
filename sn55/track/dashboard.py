@@ -315,10 +315,10 @@ $('#callout').innerHTML=`<b>The whole gap is CF.</b> Our structural base (${fmt(
 // ---- frontier ----
 $('#frontier').innerHTML=[
   `<li><b>Base is solved, honestly.</b> Seed-safe GC tuning (non-seed, PAM-distal, within max_mismatches) plus greedy allocation lifted our base to ${fmt(DATA.gap.our_base,0)} — above the latest rank-5 finisher — with the targeting seed and real specificity untouched.</li>`,
-  `<li><b>CF is the wall.</b> Our CF is ${fmt(DATA.gap.our_cf_mean,3)} and does not move across seeds (it is not a spike we can wait for). Winners run ${fmt(DATA.winner_anatomy.median_CF,2)}.</li>`,
-  `<li><b>Ruled out:</b> GC-spread, distance-spread and bimodal feature layouts — none raised CF in testing.</li>`,
-  `<li><b>Next tests (offline, official scorer):</b> vary the stage-4 features we have not swept (energy via region, microhomology, consistency) and submission cardinality, to find whether any legitimate submission structure raises cross-validated CF at high DFF.</li>`,
-  `<li><b>Off the table:</b> editing the targeting seed to fake uniqueness, and extra UIDs against the one-per-owner rule. Neither is an optimization; both are excluded on principle.</li>`,
+  `<li><b>CF is a hard wall under v3 — proven, not assumed.</b> The scorer's targets are near-pure noise: the best-possible oracle predictor reaches R² ≈ 0.02, capping honest CF at ≈ 0.31. Energy-spread (the one mechanistic lever) was tested and does not move CF; it only costs base. Our ${fmt(DATA.gap.our_cf_mean,3)} is near the realistic honest level.</li>`,
+  `<li><b>Winners exceed the honest ceiling.</b> CF ${fmt(DATA.winner_anatomy.median_CF,2)} is above the oracle's ~0.31 — reachable only by overfitting the cross-validation, not by submission quality. Off the table for us, with seed-faking and extra UIDs.</li>`,
+  `<li><b>The real opening is v4.</b> A newer pipeline (/api/v4) scores with a deterministic, biology-based recommendation model — no CV lottery. If the subnet migrates to it, honest competitive effort pays off; the solver would be rebuilt against phenotype/direction/rarity.</li>`,
+  `<li><b>Decision pending:</b> confirm whether scoring is migrating v3 → v4. Under v3 the honest ceiling is mid-pack; under v4 it reopens. The tracker flags the switch the moment it happens.</li>`,
 ].join('');
 $('#foot').innerHTML=`Source: validator leaderboard /api/v3/miners/scores (${DATA.n_rows.toLocaleString()} scored rows, ${DATA.n_rounds} rounds) + on-chain metagraph. `+
   `Historical UID-${DATA.our_uid} rows predate our registration (prior occupant). Our rounds appear as the box posts them; this page refreshes from the live tracker.`;
