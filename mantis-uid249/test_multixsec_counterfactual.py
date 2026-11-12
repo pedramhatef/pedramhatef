@@ -102,3 +102,18 @@ def test_memory_preflight_formula_matches_probes():
     # Measured peak MB on the pinned scorer at T=32805 (this session): H=16 811, H=32 1123, H=64 1751.
     for H, meas in ((16, 811), (32, 1123), (64, 1751)):
         assert abs(mc.predicted_peak_bytes(32805, H) / 2**20 - meas) / meas < 0.03
+
+
+def test_active_membership_removes_columns_like_validator(scorer):
+    prices, X, hks, f = world(17500, H=5, zero_cols=0, seed=6)
+    X = np.ascontiguousarray(X, dtype=np.float32)
+    active = {"FULL": ["hk0", "hk2", "hk3", "not_in_field"]}
+    out, _, cols = mc.run(scorer, X, hks, prices, f, "hk2", ["V1"], ["FULL"], active)
+    keep = [0, 2, 3]
+    for v in ("baseline", "V1"):
+        Xs = X[:, keep, :].copy(); Xs[:, 1, :] = cols[v]
+        ref = scorer.compute_xsec_rank_salience((Xs.reshape(Xs.shape[0], -1), {hks[k]: i for i, k in enumerate(keep)}), prices, 1200, 5)
+        assert out["FULL"][v] == mc.share_rank(ref, "hk2")
+    assert out["FULL"]["_active"] == {"registered": 4, "kept_columns": 3, "registered_but_absent_from_field": 1}
+    with pytest.raises(SystemExit, match="target not registered"):
+        mc.run(scorer, X, hks, prices, f, "hk1", [], ["FULL"], active)

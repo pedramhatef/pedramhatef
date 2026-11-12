@@ -195,7 +195,9 @@ def share_rank(sal: dict, hk: str):
     return round(float(s), 6), (ranks.index(s) + 1 if s > 0 else None), len(sal)
 
 
-def run(scorer, X, hks, prices, funding33, target, variants, folds):
+def run(scorer, X, hks, prices, funding33, target, variants, folds, active=None):
+    """active: optional {fold: [hotkeys registered at that fold's end block]}. Validator semantics
+    (_collect_hotkeys with active_hotkeys): non-registered columns are REMOVED, not zeroed."""
     j = hks.index(target)
     cur = X[:, j, :].astype(np.float64)
     cols = {"baseline": cur.astype(np.float32)}
@@ -209,8 +211,23 @@ def run(scorer, X, hks, prices, funding33, target, variants, folds):
         sl = fold_slices[fname]
         n = len(range(*sl.indices(T)))
         out[fname] = {"_scorable_segments": scorable_segments(n, sl.start or 0)}
-        for v, col in cols.items():
-            out[fname][v] = share_rank(scored_with_column(scorer, X, sl, j, col, hks, prices), target)
+        act = (active or {}).get(fname)
+        if act is None:
+            for v, col in cols.items():
+                out[fname][v] = share_rank(scored_with_column(scorer, X, sl, j, col, hks, prices), target)
+        else:
+            aset = set(act)
+            if target not in aset:
+                raise SystemExit(f"STOP: target not registered at {fname} end; that fold cannot score UID249")
+            keep = [k for k, h in enumerate(hks) if h in aset]
+            sub_hks = [hks[k] for k in keep]
+            jj = sub_hks.index(target)
+            Xs = X[sl][:, keep, :]                                  # copy of the registered subset only
+            out[fname]["_active"] = {"registered": len(aset), "kept_columns": len(keep),
+                                     "registered_but_absent_from_field": len(aset - set(hks))}
+            for v, col in cols.items():
+                Xs[:, jj, :] = col[sl]
+                out[fname][v] = share_rank(score(scorer, Xs, sub_hks, prices[sl]), target)
     cov = {v: round(float((c != 0).mean()), 4) for v, c in cols.items()}
     return out, cov, cols
 
@@ -247,6 +264,7 @@ def main(argv=None):
     ap.add_argument("--folds", default="F1,F2,FULL")
     ap.add_argument("--daily", action="store_true")
     ap.add_argument("--drop-zero-cols", action="store_true")
+    ap.add_argument("--active-json", help='{"F1":[hotkeys],"F2":[...],"FULL":[...]} registered at each fold end block')
     ap.add_argument("--mem-fraction", type=float, default=0.85,
                     help="refuse to run if the predicted peak exceeds this fraction of MemAvailable")
     ap.add_argument("--out", default="multixsec_result.json")
@@ -275,8 +293,10 @@ def main(argv=None):
            "shape": {"T": int(X.shape[0]), "H": int(X.shape[1]), "A": int(X.shape[2])},
            "freeze_audit": freeze_audit(prices, funding33 if "funding33" in z.files else None, ts)}
     variants = a.variants.split(",")
+    active = json.load(open(a.active_json)) if a.active_json else None
+    res["membership"] = "validator-equivalent (--active-json)" if active else "UNION of observed hotkeys (not validator-equivalent)"
     res["shares"], res["coverage"], cols = run(scorer, X, hks, prices, funding33, a.target,
-                                               variants, a.folds.split(","))
+                                               variants, a.folds.split(","), active)
     if a.daily:
         res["daily"] = daily(scorer, X, hks, prices, ts, a.target, cols, [v for v in variants if v in ("V1", "V2", "R")])
     json.dump(res, open(a.out, "w"), indent=1)
