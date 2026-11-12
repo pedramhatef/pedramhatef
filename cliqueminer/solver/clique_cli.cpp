@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     for (auto& c : R.sub_cliques) if ((int)c.v.size() != R.best - 1 || !clq::is_clique(g, c.v) || !clq::is_maximal(g, c.v)) bad++;
     long long m = 0; for (int v = 0; v < g.n; v++) m += g.deg[v];
     printf("{\"n\":%d,\"density\":%.4f,\"decode_ms\":%.2f,\"best\":%d,\"time_to_best_ms\":%.1f,\"steps\":%llu,\"episodes\":%llu,\"elapsed_ms\":%.1f,\"n_max\":%zu,\"n_ls_max\":%zu,\"closure_bigger\":%d,\"n_sub\":%zu,\"invalid\":%d,",
-           g.n, (double)m / ((double)g.n * (g.n - 1)), dec_ms, R.best, R.time_to_best_ms, (unsigned long long)R.steps, (unsigned long long)R.episodes, R.elapsed_ms, R.max_cliques.size(), R.n_ls_max, (int)R.closure_found_bigger, R.sub_cliques.size(), bad);
+           g.n, g.n > 1 ? (double)m / ((double)g.n * (g.n - 1)) : 0.0, dec_ms, R.best, R.time_to_best_ms, (unsigned long long)R.steps, (unsigned long long)R.episodes, R.elapsed_ms, R.max_cliques.size(), R.n_ls_max, (int)R.closure_found_bigger, R.sub_cliques.size(), bad);
     auto dump = [&](const char* name, std::vector<clq::CliqueRec>& L) {
         printf("\"%s\":[", name);
         for (size_t i = 0; i < L.size() && (int)i < max_out; i++) { printf("%s{\"v\":[", i ? "," : ""); for (size_t k = 0; k < L[i].v.size(); k++) printf("%s%d", k ? "," : "", L[i].v[k]); printf("],\"visits\":%u,\"episodes\":%u,\"first_ms\":%.1f}", L[i].visits, L[i].episodes, L[i].first_ms); }

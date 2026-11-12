@@ -9,9 +9,10 @@ What the logged validator data (Nov 2026) shows about the miners already on the 
   * when the graph has fewer maximum cliques than a fixed per-tier threshold (12 / 8 / 5 / 3 for the 300 / 500 / 700 /
     900-node tiers, roughly expected_queried_miners / 8) they switch, together, to distinct maximal cliques of size
     best-1 (keeping omega ~0.95 but delta ~1).
-`mirror` reproduces that size rule and picks uniformly at random inside the chosen size class. Nothing observable at
-request time predicts which individual cliques the incumbents will occupy (see FINDINGS.md), so uniform is the
-unexploitable choice.
+`mirror` reproduces that size rule and picks uniformly at random inside the chosen size class. Which individual cliques
+the incumbents occupy is only weakly predictable at request time (a learned picker gained about +0.04 reward in
+backtests, see FINDINGS.md); simple rules based on discovery order or search hit counts gained nothing, so the pick is
+uniform.
 """
 from __future__ import annotations
 

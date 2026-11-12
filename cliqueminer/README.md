@@ -4,9 +4,10 @@ A maximum-clique miner for Bittensor subnet 83 (CliqueAI), plus the analysis too
 it is worthwhile.
 
 **Read [FINDINGS.md](FINDINGS.md) first.** Short version, as of 2026-11-12: the miner works and matches the best
-clique size any incumbent returns, but a newcomer cannot reach the top 20 under the current mechanism. The limit is
-the reward's *diversity* term combined with how the existing miners coordinate their answers, not solver quality or
-hardware. `python -m analysis.contestability` re-measures this from public data whenever you want to check again.
+clique size any incumbent returns, but a newcomer cannot reach the top 20 under the current mechanism (expected
+reward 2.50 per round against about 2.70 needed, and 2.64 even with perfect foresight). The limit is the reward's
+*diversity* term combined with how the existing miners coordinate their answers, not solver quality or hardware.
+`python -m analysis.contestability` re-measures this from public data whenever you want to check again.
 
 ## What is here
 
@@ -65,7 +66,8 @@ PYTHONPATH=/path/to/CliqueAI python -m pytest tests                 # adds the B
   recorded by Zobrist hash; a closure pass then enumerates all maximum cliques within one or two vertex swaps.
 - **Answer choice.** `policy.py` mirrors the size rule the incumbents use (answer one vertex below the maximum when
   the graph has fewer than 12 / 8 / 5 / 3 maximum cliques on the 300 / 500 / 700 / 900-node tier) and picks uniformly
-  at random inside that size class. Nothing observable at request time predicts which cliques the incumbents occupy.
+  at random inside that size class. Which cliques the incumbents occupy is only weakly predictable at request time,
+  and exploiting it is worth about +0.04 reward at best (see FINDINGS.md), so it is not attempted.
 - **Safety.** The chosen clique is re-verified in Python against an independent decode of the graph (valid, maximal,
   in range, no duplicates) before it is sent. If the native solver is missing, fails, or returns anything that does
   not verify, a greedy maximal clique is returned instead. A reply is never knowingly invalid.
