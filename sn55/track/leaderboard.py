@@ -20,18 +20,26 @@ SCORE_URL = f"{BASE_URL}/api/v3/miners/scores"
 SCORE_DISTRIBUTION = [0.30, 0.20, 0.20, 0.15, 0.05, 0.03, 0.025, 0.02, 0.015, 0.01]
 
 
-def fetch_scores(url=SCORE_URL, wallet=None, timeout=60, per_page=100000):
-    """GET the leaderboard. If a bittensor wallet is given, sign the request the way the validator
-    client does (hotkey signature, no receiver binding); otherwise try an unsigned GET."""
-    full = f"{url}?per_page={per_page}"
+def fetch_scores(url=SCORE_URL, wallet=None, timeout=180, retries=3):
+    """GET the full leaderboard. A plain no-parameter GET returns ALL rows in a single page (the
+    server's default); `per_page` is capped at 100 server-side, so passing any page/per_page value
+    is rejected 422 — hence no query params. The endpoint is PUBLIC: the default is an unsigned GET,
+    and a request is signed only if a wallet is explicitly passed (opt-in). The response is large
+    (tens of MB), so retry transient read/connection errors."""
     headers = {"Accept": "application/json", "User-Agent": "sn55-tracker"}
     if wallet is not None:
         import bittensor as bt
         headers.update(bt.http_auth.sign(wallet, method="GET", path="/api/v3/miners/scores", body=b""))
-    req = urllib.request.Request(full, headers=headers, method="GET")
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        data = json.loads(r.read())
-    return data["items"] if isinstance(data, dict) and "items" in data else data
+    last = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=headers, method="GET")
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                data = json.loads(r.read())
+            return data["items"] if isinstance(data, dict) and "items" in data else data
+        except Exception as e:
+            last = e; time.sleep(2 ** attempt)
+    raise last
 
 
 def _bd(row, key, default=None):

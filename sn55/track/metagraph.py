@@ -8,13 +8,20 @@ import datetime as dt
 
 
 def _f(v):
+    """Coerce any metagraph numeric (float, int, numpy scalar, or a bittensor Balance such as
+    `τ1.234`) to a plain float. float() handles Balance (-> tao) and numpy; a string like "τ0.00"
+    falls back to a digit strip."""
+    if v is None:
+        return 0.0
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        pass
     import re
-    if isinstance(v, str):
-        try:
-            return float(re.sub(r"[^0-9.eE+-]", "", v) or 0)
-        except Exception:
-            return 0.0
-    return float(v or 0)
+    try:
+        return float(re.sub(r"[^0-9.eE+-]", "", str(v)) or 0)
+    except Exception:
+        return 0.0
 
 
 def snapshot(netuid=55, network="finney", our_uid=None, our_hotkey=None):
@@ -23,12 +30,16 @@ def snapshot(netuid=55, network="finney", our_uid=None, our_hotkey=None):
     s = bt.Subtensor(network)
     m = s.subnets.metagraph(netuid)
     head = s.block
+    NUM = {"incentive", "emission", "dividends", "trust", "consensus", "rank", "total_stake"}
     neurons = []
     for n in m.neurons:
-        neurons.append({k: getattr(n, k, None) for k in
-                        ["uid", "hotkey", "coldkey", "validator_permit", "incentive", "emission",
-                         "dividends", "trust", "consensus", "rank", "total_stake", "last_update",
-                         "block_at_registration", "axon"]})
+        rec = {}
+        for k in ["uid", "hotkey", "coldkey", "validator_permit", "incentive", "emission",
+                  "dividends", "trust", "consensus", "rank", "total_stake", "last_update",
+                  "block_at_registration", "axon"]:
+            v = getattr(n, k, None)
+            rec[k] = _f(v) if k in NUM else (v if not hasattr(v, "tao") else _f(v))
+        neurons.append(rec)
     out = {"utc": dt.datetime.now(dt.timezone.utc).isoformat(), "head_block": head,
            "metagraph_block": int(getattr(m, "block", 0) or 0), "netuid": netuid,
            "tempo": int(getattr(m, "tempo", 0) or 0),
