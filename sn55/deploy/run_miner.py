@@ -55,6 +55,15 @@ class Sn55Miner(_UpstreamMiner):
         app = self.app
         miner = self
         require_receiver = os.environ.get("NIOME_REQUIRE_RECEIVER") == "1"
+        # Live validators' signed nonces arrive >10s old (their clock runs behind ours, which is
+        # NTP-correct), so the stock 10s/2s window rejects every request with StaleRequest.
+        # Widen it, backed by a nonce store whose retention covers the window so replay protection
+        # is preserved (verify() refuses max_age + allowed_skew > retention).
+        max_age = float(os.environ.get("NIOME_AUTH_MAX_AGE", "600"))
+        allowed_skew = float(os.environ.get("NIOME_AUTH_SKEW", "300"))
+        nonce_store = bt.http_auth.InMemoryNonceStore(retention=max_age + allowed_skew + 60.0)
+        logging.info(f"/forward auth window: max_age={max_age}s allowed_skew={allowed_skew}s "
+                     f"require_receiver={require_receiver}")
 
         @app.post("/forward")
         async def handle_forward(request: Request):
@@ -67,6 +76,7 @@ class Sn55Miner(_UpstreamMiner):
                         headers, body, method="POST", path="/forward",
                         self_hotkey_ss58=miner.wallet.hotkey.ss58_address,
                         require_receiver=require_receiver,
+                        max_age=max_age, allowed_skew=allowed_skew, nonce_store=nonce_store,
                     )
                 except bt.http_auth.AuthError as e:
                     logging.warning(f"/forward AUTH FAILED from {client}: {type(e).__name__}: {e}")
