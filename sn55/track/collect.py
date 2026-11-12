@@ -65,15 +65,16 @@ def _wallet():
         return None
 
 
-def poll_leaderboard():
+def poll_leaderboard(rows=None):
     path = os.path.join(TRACK_DIR, "rounds.jsonl")
     seen = _load_ids(path, "task_id")
-    try:
-        rows = LB.fetch_scores(wallet=_wallet())
-    except Exception as e:
-        hint = " (if this is a 401, the endpoint wants a signature; signing is opt-in only — " \
-               "set SN55_SIGN=1 deliberately, it is never enabled automatically)" if "401" in str(e) else ""
-        print(f"{_now()} leaderboard fetch failed: {e}{hint}"); return 0
+    if rows is None:
+        try:
+            rows = LB.fetch_scores(wallet=_wallet())
+        except Exception as e:
+            hint = " (if this is a 401, the endpoint wants a signature; signing is opt-in only — " \
+                   "set SN55_SIGN=1 deliberately, it is never enabled automatically)" if "401" in str(e) else ""
+            print(f"{_now()} leaderboard fetch failed: {e}{hint}"); return 0
     rounds = LB.group_rounds(rows)
     added = 0
     for tid, rnd in rounds.items():
@@ -137,12 +138,32 @@ def score_captures():
     return done
 
 
+def poll_challenge(rows=None):
+    """Watch for a challenge rotation (Challenge 2 -> 3). The whole Challenge-3 plan hinges on
+    catching this early, so it runs every poll: cheap API-version probe + breakdown-key + captured
+    contract schema. On any signal it writes CHALLENGE_ALERT.txt and logs loudly."""
+    from track import challenge as CH
+    state = CH.detect(rows=rows, capture_dir=CAPTURE_DIR, probe=True)
+    alert = CH.record(TRACK_DIR, state)
+    if state["rotated"]:
+        print(f"{_now()} *** CHALLENGE ROTATION DETECTED *** {state['signals']} -> {alert}")
+    else:
+        print(f"{_now()} challenge watch: no rotation (still Challenge 2 CRISPR); "
+              f"live newer APIs={state['live_api_versions']}")
+    return state
+
+
 def loop():
     os.makedirs(TRACK_DIR, exist_ok=True)
     print(f"{_now()} tracker up: TRACK_DIR={TRACK_DIR} UID={OUR_UID} poll={POLL_S}s")
     while True:
         try:
-            poll_leaderboard(); poll_metagraph(); score_captures()
+            rows = None
+            try:
+                rows = LB.fetch_scores(wallet=_wallet())
+            except Exception as e:
+                print(f"{_now()} leaderboard fetch failed: {e}")
+            poll_leaderboard(rows); poll_metagraph(); poll_challenge(rows); score_captures()
         except Exception as e:
             print(f"{_now()} loop error: {e}")
         time.sleep(POLL_S)
@@ -150,6 +171,11 @@ def loop():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "once":
-        poll_leaderboard(); poll_metagraph(); score_captures()
+        rows = None
+        try:
+            rows = LB.fetch_scores(wallet=_wallet())
+        except Exception as e:
+            print(f"{_now()} leaderboard fetch failed: {e}")
+        poll_leaderboard(rows); poll_metagraph(); poll_challenge(rows); score_captures()
     else:
         loop()
