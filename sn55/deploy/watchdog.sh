@@ -3,6 +3,9 @@
 set -u
 export NIOME_REPO=$HOME/sn55/subnet-niome SN55_PKG=$HOME/sn55/pkg CHR11_FA=$HOME/sn55/data/chr11.fa
 export NIOME_CAPTURE_DIR=$HOME/sn55/data/captures NIOME_AXON_IP=89.117.2.184 NIOME_AXON_PORT=8080
+# Hardening, enabled after the first genuine task (owner validator UID 119, upload to www.googleapis.com):
+# only callers holding a validator permit, and only uploads to known NIOME storage hosts.
+export NIOME_REQUIRE_VALIDATOR=1 NIOME_STRICT_UPLOAD_HOST=1
 cd "$SN55_PKG" || exit 1
 echo "[watchdog] started $(date -u)"
 while true; do

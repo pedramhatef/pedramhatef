@@ -100,7 +100,9 @@ class Sn55Miner(_UpstreamMiner):
         allowed_skew = float(os.environ.get("NIOME_AUTH_SKEW", "300"))
         nonce_store = bt.http_auth.InMemoryNonceStore(retention=max_age + allowed_skew + 60.0)
         logging.info(f"/forward auth window: max_age={max_age}s allowed_skew={allowed_skew}s "
-                     f"require_receiver={require_receiver}")
+                     f"require_receiver={require_receiver} "
+                     f"require_validator={os.environ.get('NIOME_REQUIRE_VALIDATOR') == '1'} "
+                     f"strict_upload_host={os.environ.get('NIOME_STRICT_UPLOAD_HOST') == '1'}")
 
         @app.post("/forward")
         async def handle_forward(request: Request):
