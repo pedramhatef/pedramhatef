@@ -13,6 +13,11 @@ def solve(contract: dict, reference: dict, chr11_path: str) -> list:
     seq = core.load_genome(chr11_path)
     gr = reference["gene_region"]; flank = 50000
     kidx = fastscore.build_kmer_index(seq[max(0, gr["start"] - flank):gr["end"] + flank], 12)
+    if os.environ.get("NIOME_TAIL_MODE") == "1":
+        # Opt-in tail build: valid, diverse, gc~0.5/Cas9-skewed submission tuned to maximize the live
+        # consistency_factor spike odds. See solver/tail.py and CF_INVESTIGATION.md.
+        from solver import tail
+        return tail.build_tail(seq, contract, reference, kidx=kidx)
     tilt, fr, sub = optimize.optimize(seq, contract, reference, kidx=kidx)
     return sub
 
