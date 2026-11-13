@@ -1,0 +1,435 @@
+{
+ "board_id": "hluniverse-20261007",
+ "effective_from_unix": 1791331200,
+ "effective_from_utc": "2026-10-07T00:00:00Z",
+ "copied_on_utc": "2026-11-13",
+ "source": "InfiniteQuant SN89 repo HEAD 2e48ae8, data/signals-bands.json (== last entry of data/signals-bands-history.json)",
+ "board_note": "Lists 18 Vanta-tradeable Hyperliquid perps, effective 2026-10-07T00:00:00Z, matching history entry hluniverse-20261007. Values are copied from the history entry in force, never recomputed here.",
+ "refreshed_at_field": "2026-07-21T18:45:00Z",
+ "class_horizon_h": {
+  "crypto": 8,
+  "forex": 12,
+  "forex-commodities": 12,
+  "equities": 8,
+  "indices": 8,
+  "commodities": 8
+ },
+ "rules": {
+  "tp_equals_sl": true,
+  "min_touch_ticks": 2,
+  "sl_checked_first_per_tick": true,
+  "max_signals_per_utc_day": 3,
+  "min_gap_s": 3600,
+  "gap_slack_s": 30,
+  "session_bound_classes": [
+   "forex",
+   "forex-commodities",
+   "equities",
+   "indices",
+   "commodities"
+  ],
+  "fx_min_open_fraction": 0.25
+ },
+ "bands": {
+  "AAVEUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 184,
+   "sl_bps": 184,
+   "horizon_h": 8,
+   "hl_coin": "AAVE",
+   "hl_fidelity": "graded"
+  },
+  "ADAUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 195,
+   "sl_bps": 195,
+   "horizon_h": 8,
+   "hl_coin": "ADA",
+   "hl_fidelity": "graded"
+  },
+  "ALGOUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 199,
+   "sl_bps": 199,
+   "horizon_h": 8,
+   "hl_coin": "ALGO",
+   "hl_fidelity": "graded"
+  },
+  "AMDUSD": {
+   "asset_class": "equities",
+   "tp_bps": 114,
+   "sl_bps": 114,
+   "horizon_h": 8,
+   "hl_coin": "xyz:AMD",
+   "hl_fidelity": "graded"
+  },
+  "ARBUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 311,
+   "sl_bps": 311,
+   "horizon_h": 8,
+   "hl_coin": "ARB",
+   "hl_fidelity": "graded"
+  },
+  "ASTERUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 146,
+   "sl_bps": 146,
+   "horizon_h": 8,
+   "hl_coin": "ASTER",
+   "hl_fidelity": "graded"
+  },
+  "AUDUSD": {
+   "asset_class": "forex",
+   "tp_bps": 28,
+   "sl_bps": 28,
+   "horizon_h": 12,
+   "hl_coin": null,
+   "hl_fidelity": "unsupported"
+  },
+  "AVAXUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 150,
+   "sl_bps": 150,
+   "horizon_h": 8,
+   "hl_coin": "AVAX",
+   "hl_fidelity": "graded"
+  },
+  "BCHUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 151,
+   "sl_bps": 151,
+   "horizon_h": 8,
+   "hl_coin": "BCH",
+   "hl_fidelity": "graded"
+  },
+  "BNBUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 94,
+   "sl_bps": 94,
+   "horizon_h": 8,
+   "hl_coin": "BNB",
+   "hl_fidelity": "graded"
+  },
+  "BTCUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 105,
+   "sl_bps": 105,
+   "horizon_h": 8,
+   "hl_coin": "BTC",
+   "hl_fidelity": "graded"
+  },
+  "COINUSD": {
+   "asset_class": "equities",
+   "tp_bps": 143,
+   "sl_bps": 143,
+   "horizon_h": 8,
+   "hl_coin": "xyz:COIN",
+   "hl_fidelity": "graded"
+  },
+  "CRCLUSD": {
+   "asset_class": "equities",
+   "tp_bps": 174,
+   "sl_bps": 174,
+   "horizon_h": 8,
+   "hl_coin": "xyz:CRCL",
+   "hl_fidelity": "graded"
+  },
+  "CRVUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 294,
+   "sl_bps": 294,
+   "horizon_h": 8,
+   "hl_coin": "CRV",
+   "hl_fidelity": "graded"
+  },
+  "DOGEUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 133,
+   "sl_bps": 133,
+   "horizon_h": 8,
+   "hl_coin": "DOGE",
+   "hl_fidelity": "graded"
+  },
+  "DOTUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 186,
+   "sl_bps": 186,
+   "horizon_h": 8,
+   "hl_coin": "DOT",
+   "hl_fidelity": "graded"
+  },
+  "ENAUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 295,
+   "sl_bps": 295,
+   "horizon_h": 8,
+   "hl_coin": "ENA",
+   "hl_fidelity": "graded"
+  },
+  "ETHUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 138,
+   "sl_bps": 138,
+   "horizon_h": 8,
+   "hl_coin": "ETH",
+   "hl_fidelity": "graded"
+  },
+  "EURUSD": {
+   "asset_class": "forex",
+   "tp_bps": 17,
+   "sl_bps": 17,
+   "horizon_h": 12,
+   "hl_coin": "xyz:EUR",
+   "hl_fidelity": "proxy"
+  },
+  "EWYUSD": {
+   "asset_class": "indices",
+   "tp_bps": 90,
+   "sl_bps": 90,
+   "horizon_h": 8,
+   "hl_coin": "xyz:EWY",
+   "hl_fidelity": "graded"
+  },
+  "HYPEUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 184,
+   "sl_bps": 184,
+   "horizon_h": 8,
+   "hl_coin": "HYPE",
+   "hl_fidelity": "graded"
+  },
+  "INTCUSD": {
+   "asset_class": "equities",
+   "tp_bps": 164,
+   "sl_bps": 164,
+   "horizon_h": 8,
+   "hl_coin": "xyz:INTC",
+   "hl_fidelity": "graded"
+  },
+  "KPEPEUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 203,
+   "sl_bps": 203,
+   "horizon_h": 8,
+   "hl_coin": "kPEPE",
+   "hl_fidelity": "graded"
+  },
+  "LINKUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 163,
+   "sl_bps": 163,
+   "horizon_h": 8,
+   "hl_coin": "LINK",
+   "hl_fidelity": "graded"
+  },
+  "LTCUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 121,
+   "sl_bps": 121,
+   "horizon_h": 8,
+   "hl_coin": "LTC",
+   "hl_fidelity": "graded"
+  },
+  "METAUSD": {
+   "asset_class": "equities",
+   "tp_bps": 90,
+   "sl_bps": 90,
+   "horizon_h": 8,
+   "hl_coin": "xyz:META",
+   "hl_fidelity": "graded"
+  },
+  "MRVLUSD": {
+   "asset_class": "equities",
+   "tp_bps": 141,
+   "sl_bps": 141,
+   "horizon_h": 8,
+   "hl_coin": "xyz:MRVL",
+   "hl_fidelity": "graded"
+  },
+  "MSTRUSD": {
+   "asset_class": "equities",
+   "tp_bps": 177,
+   "sl_bps": 177,
+   "horizon_h": 8,
+   "hl_coin": "xyz:MSTR",
+   "hl_fidelity": "graded"
+  },
+  "MUUSD": {
+   "asset_class": "equities",
+   "tp_bps": 102,
+   "sl_bps": 102,
+   "horizon_h": 8,
+   "hl_coin": "xyz:MU",
+   "hl_fidelity": "graded"
+  },
+  "NEARUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 257,
+   "sl_bps": 257,
+   "horizon_h": 8,
+   "hl_coin": "NEAR",
+   "hl_fidelity": "graded"
+  },
+  "NVDAUSD": {
+   "asset_class": "equities",
+   "tp_bps": 62,
+   "sl_bps": 62,
+   "horizon_h": 8,
+   "hl_coin": "xyz:NVDA",
+   "hl_fidelity": "graded"
+  },
+  "PUMPUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 328,
+   "sl_bps": 328,
+   "horizon_h": 8,
+   "hl_coin": "PUMP",
+   "hl_fidelity": "graded"
+  },
+  "SNDKUSD": {
+   "asset_class": "equities",
+   "tp_bps": 127,
+   "sl_bps": 127,
+   "horizon_h": 8,
+   "hl_coin": "xyz:SNDK",
+   "hl_fidelity": "graded"
+  },
+  "SOLUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 134,
+   "sl_bps": 134,
+   "horizon_h": 8,
+   "hl_coin": "SOL",
+   "hl_fidelity": "graded"
+  },
+  "SP500USD": {
+   "asset_class": "indices",
+   "tp_bps": 26,
+   "sl_bps": 26,
+   "horizon_h": 8,
+   "hl_coin": "xyz:SP500",
+   "hl_fidelity": "graded"
+  },
+  "SUIUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 176,
+   "sl_bps": 176,
+   "horizon_h": 8,
+   "hl_coin": "SUI",
+   "hl_fidelity": "graded"
+  },
+  "TAOUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 165,
+   "sl_bps": 165,
+   "horizon_h": 8,
+   "hl_coin": "TAO",
+   "hl_fidelity": "graded"
+  },
+  "TRXUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 51,
+   "sl_bps": 51,
+   "horizon_h": 8,
+   "hl_coin": "TRX",
+   "hl_fidelity": "graded"
+  },
+  "TSLAUSD": {
+   "asset_class": "equities",
+   "tp_bps": 65,
+   "sl_bps": 65,
+   "horizon_h": 8,
+   "hl_coin": "xyz:TSLA",
+   "hl_fidelity": "graded"
+  },
+  "UNIUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 280,
+   "sl_bps": 280,
+   "horizon_h": 8,
+   "hl_coin": "UNI",
+   "hl_fidelity": "graded"
+  },
+  "USDCAD": {
+   "asset_class": "forex",
+   "tp_bps": 17,
+   "sl_bps": 17,
+   "horizon_h": 12,
+   "hl_coin": null,
+   "hl_fidelity": "unsupported"
+  },
+  "WLDUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 280,
+   "sl_bps": 280,
+   "horizon_h": 8,
+   "hl_coin": "WLD",
+   "hl_fidelity": "graded"
+  },
+  "WTIUSD": {
+   "asset_class": "commodities",
+   "tp_bps": 125,
+   "sl_bps": 125,
+   "horizon_h": 8,
+   "hl_coin": "xyz:CL",
+   "hl_fidelity": "graded"
+  },
+  "XAGUSD": {
+   "asset_class": "forex-commodities",
+   "tp_bps": 195,
+   "sl_bps": 195,
+   "horizon_h": 12,
+   "hl_coin": "xyz:SILVER",
+   "hl_fidelity": "proxy"
+  },
+  "XAUUSD": {
+   "asset_class": "forex-commodities",
+   "tp_bps": 96,
+   "sl_bps": 96,
+   "horizon_h": 12,
+   "hl_coin": "xyz:GOLD",
+   "hl_fidelity": "proxy"
+  },
+  "XMRUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 216,
+   "sl_bps": 216,
+   "horizon_h": 8,
+   "hl_coin": "XMR",
+   "hl_fidelity": "graded"
+  },
+  "XRPUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 123,
+   "sl_bps": 123,
+   "horizon_h": 8,
+   "hl_coin": "XRP",
+   "hl_fidelity": "graded"
+  },
+  "XYZ100USD": {
+   "asset_class": "indices",
+   "tp_bps": 43,
+   "sl_bps": 43,
+   "horizon_h": 8,
+   "hl_coin": "xyz:XYZ100",
+   "hl_fidelity": "graded"
+  },
+  "ZECUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 298,
+   "sl_bps": 298,
+   "horizon_h": 8,
+   "hl_coin": "ZEC",
+   "hl_fidelity": "graded"
+  },
+  "ZROUSD": {
+   "asset_class": "crypto",
+   "tp_bps": 317,
+   "sl_bps": 317,
+   "horizon_h": 8,
+   "hl_coin": "ZRO",
+   "hl_fidelity": "graded"
+  }
+ }
+}
