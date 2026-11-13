@@ -21,8 +21,10 @@ def build_tail(seq, contract, reference, kidx=None, cas9_frac=None, floor=12, L=
     cas_systems = rules.get("cas_systems", ["Cas9", "Cas12a"]); max_exp = rules.get("max_experiments", 250)
     bp = rules["base_padding"]; pg = rules.get("proximity_gate", False); maxmm = int(rules.get("max_mismatches", 3))
     mmap = reference["mutation_map"]; ct = contract.get("cell_type"); mw = contract.get("mutation_weights", {})
-    cas9_frac = float(os.environ.get("NIOME_TAIL_CAS9_FRAC", cas9_frac if cas9_frac is not None else 0.70))
-    floor = int(os.environ.get("NIOME_TAIL_FLOOR", floor))
+    # Deploy default cas9_frac=0.80 / floor=11: the valid build with the best measured live
+    # win-probability (official scorer, 90 seeds, 3-seed averaging, variable round cutoff).
+    cas9_frac = float(os.environ.get("NIOME_TAIL_CAS9_FRAC", cas9_frac if cas9_frac is not None else 0.80))
+    floor = int(os.environ.get("NIOME_TAIL_FLOOR", 11 if floor == 12 else floor))
     dom = "Cas9" if "Cas9" in cas_systems else cas_systems[0]
     combos = [(m, c, s) for m in muts for c in cas_systems for s in ("+", "-")]
     cands, bycell = [], {}
